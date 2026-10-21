@@ -1,0 +1,11 @@
+# vendir-synced upstream sources (large binaries, never committed)
+src/
+
+# local blob cache (used until blobs are published to the final blobstore)
+blobs/
+
+# final blobstore credentials (s3-compat GCS)
+config/private.yml
+
+# dev release tarballs
+*.tgz

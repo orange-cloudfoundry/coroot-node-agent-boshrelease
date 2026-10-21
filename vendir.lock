@@ -1,0 +1,9 @@
+apiVersion: vendir.k14s.io/v1alpha1
+directories:
+- contents:
+  - githubRelease:
+      tag: v1.36.4
+      url: https://api.github.com/repos/coroot/coroot-node-agent/releases/413955010
+    path: coroot/coroot-node-agent
+  path: src/github.com
+kind: LockConfig

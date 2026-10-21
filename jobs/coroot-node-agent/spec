@@ -1,0 +1,71 @@
+---
+name: coroot-node-agent
+description: |
+  Coroot node agent - eBPF-based telemetry agent (metrics, network traces,
+  continuous profiling) for BOSH-managed VMs. Pushes telemetry to a Coroot
+  collector endpoint (metrics via Prometheus remote-write, traces/profiles via OTLP).
+  The agent needs root privileges to load its eBPF programs and is managed by BPM:
+  requires the bpm release, usually provided platform-wide by the bpm runtime-config addon.
+  Each BPM job on the VM appears as a distinct application in Coroot (cgroup grouping).
+  Docs: https://docs.coroot.com/configuration/coroot-node-agent/
+packages:
+- coroot-node-agent
+templates:
+  bpm.yml.erb: config/bpm.yml
+  pre-start.erb: bin/pre-start
+provides:
+- name: coroot-node-agent
+  type: telemetry_agent
+consumes: []
+properties:
+  coroot.collector_endpoint:
+    description: "Coroot collector base URL (no default: fails fast when the add-on forgets it)"
+    example: "https://coroot-00-core-connectivity-k8s.example.internal"
+  coroot.api_key:
+    description: "Coroot project API key (ingest-scoped). Provided via runtime vars / vars-store, never committed. Passed to the process environment, not the command line."
+    sensitive: true
+  coroot.listen:
+    description: "Agent HTTP listen address, used for local /metrics scraping. MUST stay loopback-bound in push mode: the upstream default 0.0.0.0:80 collides with routers/haproxy VMs."
+    default: "127.0.0.1:80"
+  coroot.scrape_interval:
+    description: "How often the agent collects its internal metrics"
+    default: "15s"
+  coroot.traces_sampling:
+    description: "Trace sampling rate, 0.0 to 1.0"
+    default: 1.0
+  coroot.disable.log_parsing:
+    description: "Disable container/process log parsing (keep OFF when the collector has bounded storage; syslog pipeline stays system of record)"
+    default: true
+  coroot.disable.l7_tracing:
+    description: "Disable application-layer (L7) eBPF tracing"
+    default: false
+  coroot.disable.pinger:
+    description: "Disable ICMP ping probes to upstreams"
+    default: false
+  coroot.disable.gpu_monitoring:
+    description: "Disable GPU monitoring (NVML)"
+    default: true
+  coroot.container_allowlist:
+    description: "Regex list of cgroup/process names to monitor (empty = all)"
+    default: []
+  coroot.container_denylist:
+    description: "Regex list of cgroup/process names to exclude - per-VM noise control escape hatch for the add-on"
+    default: []
+  coroot.wal_dir:
+    description: "Write-ahead-log/spool directory for buffering when the collector is unreachable"
+    default: "/var/vcap/data/coroot-node-agent"
+  coroot.max_spool_size:
+    description: "Max on-disk spool size (bounded so the ephemeral disk cannot fill up)"
+    default: "200MB"
+  coroot.ca_cert:
+    description: "Optional extra CA PEM for the collector certificate. Leave empty when the collector is served by an internal CA already installed by the ca_certs add-on."
+    default: ""
+  coroot.provider:
+    description: "Override cloud provider label (node_cloud_info). Auto-detected on GCP/AWS/Azure; set manually for on-prem IaaS (e.g. vsphere)."
+    default: ""
+  coroot.region:
+    description: "Override region label (node_cloud_info)"
+    default: ""
+  coroot.availability_zone:
+    description: "Override availability zone label (node_cloud_info)"
+    default: ""

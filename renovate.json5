@@ -1,0 +1,85 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices', //See https://docs.renovatebot.com/upgrade-best-practices/#use-the-configbest-practices-preset
+    ':disableRateLimiting',
+    'github>orange-cloudfoundry/renovate-public-presets:boshreleases-default.json5',
+  ],
+  enabledManagers: [
+    'github-actions',
+    'custom.regex',
+  ],
+  ignorePaths: [
+    'packages/**',
+    'releases/**',
+    'manifests/**',
+    'jobs/**',
+  ],
+  automergeStrategy: 'merge-commit', // use a merge commit so the final-release workflow triggers once with the vendir bump
+  baseBranchPatterns: [
+    '$default',
+  ],
+  packageRules: [
+    {
+      matchManagers: [
+        'custom.regex',
+      ],
+      matchFileNames: [
+        'vendir.yml',
+      ],
+      addLabels: [
+        'bump-from/vendir',
+      ],
+    },
+    {
+      description: 'Auto-merge patch releases of the agent, e.g. from 1.36.4 to 1.36.5. The fleet is only impacted when paas-templates bumps its root-deployment.yml pin.',
+      matchPackageNames: [
+        'coroot/coroot-node-agent',
+      ],
+      matchUpdateTypes: [
+        'patch',
+      ],
+      matchCurrentVersion: '!/-rc/',
+      automerge: true,
+      ignoreTests: true,
+    },
+    {
+      description: 'Add common labels',
+      addLabels: [
+        'datasource/{{datasource}}',
+        'depName/{{depNameSanitized}}',
+        'manager/{{manager}}',
+        'hasReleaseNotes/{{hasReleaseNotes}}',
+      ],
+      matchDepNames: [
+        '*',
+      ],
+    },
+  ],
+  customManagers: [
+    {
+      customType: 'regex',
+      description: 'watch githubRelease tag lines in vendir.yml',
+      managerFilePatterns: [
+        '/vendir.yml$/',
+      ],
+      matchStrings: [
+        ' +githubRelease:\\n +slug: (?<depName>[a-z0-9\\.\\/\\-]*?)\\n +tag: (?<currentValue>[a-z0-9\\.\\/\\-\\+]*?) *\\n',
+      ],
+      datasourceTemplate: 'github-releases',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/.github/workflows/.*\\.yml/',
+      ],
+      matchStrings: [
+        // For GitHub workflows: https://regex101.com/r/wjGoU0/2
+        'repo: (?<depName>[\\w\\d\\//\\-\\_]+)\\n\\s*tag:[\\s*|=]??\\"?v(?<currentValue>[\\w\\d\\/\\-\\.\\_]+)\\"?',
+      ],
+      versioningTemplate: 'regex:v?(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)?$',
+      extractVersionTemplate: '^v?(?<version>.*)$',
+      datasourceTemplate: 'github-tags',
+    },
+  ],
+}

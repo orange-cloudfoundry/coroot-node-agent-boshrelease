@@ -1,0 +1,5 @@
+---
+name: coroot-node-agent
+dependencies: []
+files:
+- coroot-node-agent/coroot-node-agent

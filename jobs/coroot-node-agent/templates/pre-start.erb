@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e -o pipefail
+
+WAL_DIR="<%= p('coroot.wal_dir') %>"
+mkdir -p "${WAL_DIR}"
+chmod 0700 "${WAL_DIR}"
+chown -R root:root "${WAL_DIR}"
+
+<% ca_cert = p('coroot.ca_cert') -%>
+<% if !ca_cert.to_s.strip.empty? -%>
+CA_FILE="/var/vcap/jobs/coroot-node-agent/config/extra-ca.crt"
+cat > "${CA_FILE}" <<'CAEOF'
+<%= ca_cert %>
+CAEOF
+chmod 0644 "${CA_FILE}"
+<% end -%>

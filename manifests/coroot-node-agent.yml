@@ -1,0 +1,36 @@
+---
+# Scratch manifest to smoke-test the release standalone (no runtime-config add-on).
+# bpm is deployed inline since there is no bpm runtime-config addon here.
+# Usage:
+#   bosh deploy manifests/coroot-node-agent.yml -v collector_endpoint=https://coroot.example.internal --vars-store ./dev-creds.yml
+name: coroot-node-agent-test
+releases:
+- name: coroot-node-agent
+  version: latest
+- name: bpm
+  version: 1.4.31
+stemcells:
+- alias: default
+  os: ubuntu-jammy
+  version: latest
+update:
+  canaries: 1
+  max_in_flight: 1
+  canary_watch_time: 1000-60000
+  update_watch_time: 1000-60000
+instance_groups:
+- name: agent
+  instances: 1
+  azs: [z1]
+  vm_type: default
+  networks:
+  - name: default
+  jobs:
+  - name: bpm
+    release: bpm
+  - name: coroot-node-agent
+    release: coroot-node-agent
+    properties:
+      coroot:
+        collector_endpoint: ((collector_endpoint))
+        api_key: ((coroot_api_key))

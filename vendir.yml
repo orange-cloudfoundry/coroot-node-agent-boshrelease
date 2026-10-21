@@ -1,0 +1,17 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+
+minimumRequiredVersion: 0.34.0
+directories:
+# doc: https://carvel.dev/vendir/docs/v0.40.x/vendir-spec/
+# Update flow: Renovate bumps the tag below (regex customManager in renovate.json5),
+# CI then runs vendor.sh + addblob.sh to refresh config/blobs.yml automatically.
+- path: src/github.com
+  contents:
+  - path: coroot/coroot-node-agent
+    githubRelease:
+      slug: coroot/coroot-node-agent
+      tag: v1.36.4
+      disableAutoChecksumValidation: true
+      assetNames:
+      - "coroot-node-agent-amd64"

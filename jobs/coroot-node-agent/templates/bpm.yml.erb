@@ -1,0 +1,58 @@
+---
+processes:
+- name: coroot-node-agent
+  executable: /var/vcap/packages/coroot-node-agent/bin/coroot-node-agent
+  user: root
+  additional_args:
+  - --listen=<%= p('coroot.listen') %>
+  - --collector-endpoint=<%= p('coroot.collector_endpoint') %>
+  - --scrape-interval=<%= p('coroot.scrape_interval') %>
+  - --traces-sampling=<%= p('coroot.traces_sampling') %>
+  - --wal-dir=<%= p('coroot.wal_dir') %>
+  - --max-spool-size=<%= p('coroot.max_spool_size') %>
+<% if p('coroot.disable.log_parsing') -%>
+  - --disable-log-parsing
+<% end -%>
+<% if p('coroot.disable.l7_tracing') -%>
+  - --disable-l7-tracing
+<% end -%>
+<% if p('coroot.disable.pinger') -%>
+  - --disable-pinger
+<% end -%>
+<% if p('coroot.disable.gpu_monitoring') -%>
+  - --disable-gpu-monitoring
+<% end -%>
+<% if !p('coroot.container_allowlist').empty? -%>
+  - --container-allowlist=<%= p('coroot.container_allowlist').join(',') %>
+<% end -%>
+<% if !p('coroot.container_denylist').empty? -%>
+  - --container-denylist=<%= p('coroot.container_denylist').join(',') %>
+<% end -%>
+<% if !p('coroot.ca_cert').to_s.strip.empty? -%>
+  - --ca-file=/var/vcap/jobs/coroot-node-agent/config/extra-ca.crt
+<% end -%>
+<% if !p('coroot.provider').to_s.strip.empty? -%>
+  - --provider=<%= p('coroot.provider') %>
+<% end -%>
+<% if !p('coroot.region').to_s.strip.empty? -%>
+  - --region=<%= p('coroot.region') %>
+<% end -%>
+<% if !p('coroot.availability_zone').to_s.strip.empty? -%>
+  - --availability-zone=<%= p('coroot.availability_zone') %>
+<% end -%>
+  env:
+    API_KEY: <%= p('coroot.api_key') %>
+  limits:
+    nofile: 65536
+<%# D3-SPIKE: least-privilege capability set pending verification on jammy stemcell.
+    If bpm restrictions still choke kprobe/tracepoint loading, replace this block with
+    `unsafe: true` (see openspec design.md decision D3 in paas-templates-private). %>
+  additional_capabilities:
+  - BPF
+  - PERFMON
+  - SYS_ADMIN
+  - NET_ADMIN
+  - SYS_RESOURCE
+  logrotate:
+    size: 20M
+    count: 3

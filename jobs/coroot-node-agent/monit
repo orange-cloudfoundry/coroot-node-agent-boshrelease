@@ -1,0 +1,5 @@
+check file coroot-node-agent with path /var/vcap/sys/run/bpm/coroot-node-agent/coroot-node-agent.pid
+  start program = "/var/vcap/bosh/bin/bpm-start coroot-node-agent"
+  stop program = "/var/vcap/bosh/bin/bpm-stop coroot-node-agent"
+  restart program = "/var/vcap/bosh/bin/bpm-restart coroot-node-agent"
+  renew program = "/var/vcap/bosh/bin/bpm-renew coroot-node-agent"
