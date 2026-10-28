@@ -2,8 +2,7 @@
 processes:
 - name: coroot-node-agent
   executable: /var/vcap/packages/coroot-node-agent/bin/coroot-node-agent
-  user: root
-  additional_args:
+  args:
   - --listen=<%= p('coroot.listen') %>
   - --collector-endpoint=<%= p('coroot.collector_endpoint') %>
   - --scrape-interval=<%= p('coroot.scrape_interval') %>
@@ -42,14 +41,26 @@ processes:
 <% end -%>
   env:
     API_KEY: <%= p('coroot.api_key') %>
+  ephemeral_disk: true
   limits:
-    nofile: 65536
-<%# D3: BPM always runs jobs through runc with a default seccomp profile
-    (SCMP_ACT_ERRNO(EPERM) allowlist) that blocks setns/bpf/perf_event_open/mount.
-    The agent enters the host UTS namespace via setns() at startup (fatal) and loads
-    eBPF programs via bpf(), so a capability grant alone is not enough: seccomp must
-    be off. Upstream coroot-node-agent requires a fully privileged agent, hence unsafe. %>
-  unsafe: true
-  logrotate:
-    size: 20M
-    count: 3
+    open_files: 65536
+<%# D3: the agent needs to escape the BPM sandbox in three ways, only reachable
+    via unsafe.* (see bpm docs/config.md):
+    - privileged: true  -> disables bpm's default seccomp profile (SCMP_ACT_ERRNO
+      allowlist blocks bpf/perf_event_open) and grants full capabilities incl.
+      SYS_ADMIN/BPF/PERFMON. Without it the agent dies at startup: it calls
+      setns() into /proc/1/ns/uts to read the host hostname/kernel version.
+    - host_pid_namespace: true -> bpm gives containers their own PID namespace;
+      a node agent must see all host processes (needs bpm >= 1.1.9).
+    - unrestricted_volumes -> bpm mounts /sys read-only sysfs; bind the host
+      sysfs/debugfs/bpffs writable so kprobe loading and eBPF maps work. %>
+  unsafe:
+    privileged: true
+    host_pid_namespace: true
+    unrestricted_volumes:
+    - path: /sys
+      writable: true
+    - path: /sys/kernel/debug
+      writable: true
+    - path: /sys/fs/bpf
+      writable: true

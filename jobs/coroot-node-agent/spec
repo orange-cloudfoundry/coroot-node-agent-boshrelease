@@ -6,9 +6,10 @@ description: |
   collector endpoint (metrics via Prometheus remote-write, traces/profiles via OTLP).
   The agent needs root privileges to load its eBPF programs and is managed by BPM:
   requires the bpm release, usually provided platform-wide by the bpm runtime-config addon.
-  BPM runs the job with `unsafe: true` (no seccomp/capability sandboxing): the agent calls
-  setns() into the host UTS namespace at startup and bpf()/perf_event_open() at runtime,
-  which BPM's default seccomp profile blocks even with extra capabilities granted.
+  BPM runs the job with `unsafe: {privileged: true, host_pid_namespace: true}`: the agent
+  calls setns() into the host UTS namespace at startup and bpf()/perf_event_open() at
+  runtime, which BPM's default seccomp profile blocks even with extra capabilities, and
+  it must observe all host processes (bpm >= 1.1.9 required for host_pid_namespace).
   Each BPM job on the VM appears as a distinct application in Coroot (cgroup grouping).
   Docs: https://docs.coroot.com/configuration/coroot-node-agent/
 packages:
