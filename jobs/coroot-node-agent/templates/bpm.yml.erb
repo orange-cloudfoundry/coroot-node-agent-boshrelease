@@ -44,15 +44,12 @@ processes:
     API_KEY: <%= p('coroot.api_key') %>
   limits:
     nofile: 65536
-<%# D3-SPIKE: least-privilege capability set pending verification on jammy stemcell.
-    If bpm restrictions still choke kprobe/tracepoint loading, replace this block with
-    `unsafe: true` (see openspec design.md decision D3 in paas-templates-private). %>
-  additional_capabilities:
-  - BPF
-  - PERFMON
-  - SYS_ADMIN
-  - NET_ADMIN
-  - SYS_RESOURCE
+<%# D3: BPM always runs jobs through runc with a default seccomp profile
+    (SCMP_ACT_ERRNO(EPERM) allowlist) that blocks setns/bpf/perf_event_open/mount.
+    The agent enters the host UTS namespace via setns() at startup (fatal) and loads
+    eBPF programs via bpf(), so a capability grant alone is not enough: seccomp must
+    be off. Upstream coroot-node-agent requires a fully privileged agent, hence unsafe. %>
+  unsafe: true
   logrotate:
     size: 20M
     count: 3
