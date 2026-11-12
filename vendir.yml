@@ -11,7 +11,7 @@ directories:
   - path: coroot/coroot-node-agent
     githubRelease:
       slug: coroot/coroot-node-agent
-      tag: v1.38.1
+      tag: v1.38.2
       disableAutoChecksumValidation: true
       assetNames:
       - "coroot-node-agent-amd64"
