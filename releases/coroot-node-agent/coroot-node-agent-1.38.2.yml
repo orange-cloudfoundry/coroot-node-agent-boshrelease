@@ -1,0 +1,22 @@
+name: coroot-node-agent
+version: 1.38.2
+commit_hash: adb234a
+uncommitted_changes: true
+jobs:
+- name: coroot-node-agent
+  version: 31331ad65736c322f5af0436ba859bc02c96821ea3d07476da85cd017bab902a
+  fingerprint: 31331ad65736c322f5af0436ba859bc02c96821ea3d07476da85cd017bab902a
+  sha1: sha256:9e8dac747648aa0fabd2d4eea17258fda497e3801e677fa86114a19d0e01e55f
+  packages:
+  - coroot-node-agent
+packages:
+- name: coroot-node-agent
+  version: f46557b5a10486b7a9806b257cb872af8cd6512cacd0071bd2bdce0f1f4b7cd2
+  fingerprint: f46557b5a10486b7a9806b257cb872af8cd6512cacd0071bd2bdce0f1f4b7cd2
+  sha1: sha256:aecc7ec2177de9c2de61b03278faf0602c67686e432351eff8bc0769bf5ff062
+  dependencies: []
+license:
+  version: 65f56f48f3b33cec40aaed2384d33f2924373df89d235ddaab7d2caa77c04e68
+  fingerprint: 65f56f48f3b33cec40aaed2384d33f2924373df89d235ddaab7d2caa77c04e68
+  sha1: sha256:353e7b2dd77047b444f851eb42fc92af33ac2588f9c63b937f4c0093777fd758
+no_compression: false
