@@ -5,4 +5,6 @@ builds:
     version: 1.38.1
   ad82ce22-ce48-495b-5bc1-f89f16ea501c:
     version: 1.38.2
+  ad8e6b32-a738-4891-7b47-206a42ca00fd:
+    version: 1.38.3
 format-version: "2"
